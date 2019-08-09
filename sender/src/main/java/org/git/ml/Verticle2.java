@@ -1,4 +1,4 @@
-package org.jzb.mes.auto.ml.sender;
+package org.git.ml;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -15,20 +15,19 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
-import static org.jzb.mes.auto.ml.sender.Sender.INJECTOR;
 
 /**
  * @author jzb 2019-08-08
  */
 @Slf4j
-public class WatcherVerticle extends AbstractVerticle {
+public class Verticle2 extends AbstractVerticle {
     @Inject
     @Named("watchDir")
     private String watchDir;
 
     @Override
     public void start() {
-        INJECTOR.injectMembers(this);
+        Daemon.INJECTOR.injectMembers(this);
         PathObservables.watchRecursive(Paths.get(watchDir))
                 .subscribeOn(Schedulers.io())
                 .filter(it -> ENTRY_CREATE == it.kind())
@@ -48,7 +47,7 @@ public class WatcherVerticle extends AbstractVerticle {
                     .filter(Objects::nonNull)
                     .filter(it -> !Files.isDirectory(path))
                     .map(Path::toString)
-                    .forEach(it -> vertx.eventBus().send(SendFileVerticle.ADDRESS, it));
+                    .forEach(it -> vertx.eventBus().send(Verticle1.ADDRESS, it));
         } catch (Throwable e) {
             log.error("", e);
         }

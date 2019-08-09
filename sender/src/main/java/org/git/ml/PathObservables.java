@@ -1,4 +1,4 @@
-package org.jzb.mes.auto.ml.sender;
+package org.git.ml;
 
 
 import io.reactivex.Observable;
@@ -19,25 +19,11 @@ public final class PathObservables {
     private PathObservables() {
     }
 
-    /**
-     * Creates an observable that watches the given directory and all its subdirectories. Directories
-     * that are created after subscription are watched, too.
-     *
-     * @param path Root directory to be watched
-     * @return Observable that emits an event for each filesystem event.
-     * @throws IOException
-     */
     public static Observable<WatchEvent<?>> watchRecursive(final Path path) {
         final boolean recursive = true;
         return new ObservableFactory(path, recursive).create();
     }
 
-    /**
-     * Creates an observable that watches the given path but not its subdirectories.
-     *
-     * @param path Path to be watched
-     * @return Observable that emits an event for each filesystem event.
-     */
     public static Observable<WatchEvent<?>> watchNonRecursive(final Path path) {
         final boolean recursive = false;
         return new ObservableFactory(path, recursive).create();
@@ -85,11 +71,9 @@ public final class PathObservables {
                             subscriber.onNext(event);
                             registerNewDirectory(subscriber, dir, watcher, event);
                         }
-                        // reset key and remove from set if directory is no longer accessible
                         boolean valid = key.reset();
                         if (!valid) {
                             directoriesByKey.remove(key);
-                            // nothing to be watched
                             if (directoriesByKey.isEmpty()) {
                                 break;
                             }
@@ -103,9 +87,6 @@ public final class PathObservables {
             });
         }
 
-        /**
-         * Register the rootDirectory, and all its sub-directories.
-         */
         private void registerAll(final Path rootDirectory, final WatchService watcher) throws IOException {
             Files.walkFileTree(rootDirectory, new SimpleFileVisitor<Path>() {
                 @Override
@@ -122,7 +103,6 @@ public final class PathObservables {
             directoriesByKey.put(key, dir);
         }
 
-        // register newly created directory to watching in recursive mode
         private void registerNewDirectory(
                 final ObservableEmitter<WatchEvent<?>> subscriber,
                 final Path dir,
@@ -130,7 +110,6 @@ public final class PathObservables {
                 final WatchEvent<?> event) {
             final Kind<?> kind = event.kind();
             if (recursive && kind.equals(ENTRY_CREATE)) {
-                // Context for directory entry event is the file name of entry
                 @SuppressWarnings("unchecked") final WatchEvent<Path> eventWithPath = (WatchEvent<Path>) event;
                 final Path name = eventWithPath.context();
                 final Path child = dir.resolve(name);

@@ -19,8 +19,7 @@ public class Receiver {
     public static final String QUEUE_POY = "mes-auto-ml-queue-POY";
     public static final Injector INJECTOR = Guice.createInjector(new ReceiverModule());
 
-    @SneakyThrows
-    public static void main(String[] args) {
+    public static void start() {
         final VertxOptions vertxOptions = new VertxOptions()
                 .setMaxWorkerExecuteTime(1)
                 .setMaxWorkerExecuteTimeUnit(TimeUnit.DAYS);
@@ -36,5 +35,14 @@ public class Receiver {
                 log.info("{} success", Receiver.class);
             }
         });
+    }
+
+    public static void stop() {
+        System.exit(0);
+    }
+
+    @SneakyThrows
+    public static void main(String[] args) {
+        Receiver.start();
     }
 }

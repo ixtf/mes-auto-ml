@@ -1,4 +1,4 @@
-package org.jzb.mes.auto.ml.sender;
+package org.git.ml;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -9,13 +9,15 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import lombok.Cleanup;
 import lombok.SneakyThrows;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import reactor.rabbitmq.Sender;
 import reactor.rabbitmq.*;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.util.Map;
 
 import static reactor.rabbitmq.Utils.singleConnectionMono;
@@ -23,19 +25,27 @@ import static reactor.rabbitmq.Utils.singleConnectionMono;
 /**
  * @author jzb 2019-08-08
  */
-public class SenderModule extends AbstractModule {
+public class Module extends AbstractModule {
     @SneakyThrows
     @Provides
     @Singleton
     @Named("config")
     private JsonObject config() {
-        final String configPath = System.getProperty("MES-AUTO-ML-SENDER");
-        if (configPath == null) {
+        final String configPath = System.getProperty("mes.auto.ml.sender.config");
+        if (configPath == null || configPath.isBlank()) {
             return new JsonObject();
         }
         final File file = new File(configPath);
         if (file.exists()) {
-            final Map map = Json.mapper.readValue(file, Map.class);
+            final Map map;
+            if (file.getName().endsWith(".data")) {
+                @Cleanup final FileInputStream fis = new FileInputStream(file);
+                @Cleanup final ObjectInputStream ois = new ObjectInputStream(fis);
+                final byte[] bytes = ois.readAllBytes();
+                map = Json.mapper.readValue(bytes, Map.class);
+            } else {
+                map = Json.mapper.readValue(file, Map.class);
+            }
             return new JsonObject(map);
         }
         return new JsonObject();
@@ -62,8 +72,8 @@ public class SenderModule extends AbstractModule {
         final SenderOptions senderOptions = new SenderOptions()
                 .connectionFactory(connectionFactory)
                 .connectionMono(connectionMono)
-                .channelPool(ChannelPoolFactory.createChannelPool(connectionMono, channelPoolOptions))
-                .resourceManagementScheduler(Schedulers.elastic());
+                .resourceManagementScheduler(Schedulers.elastic())
+                .channelPool(ChannelPoolFactory.createChannelPool(connectionMono, channelPoolOptions));
         return RabbitFlux.createSender(senderOptions);
     }
 

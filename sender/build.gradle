@@ -2,4 +2,8 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.2.11'
 }
 
-mainClassName = "org.jzb.mes.auto.ml.sender.Sender"
+mainClassName = "org.git.ml.Daemon"
+
+shadowJar {
+    archiveName "config.jar"
+}
