@@ -1,7 +1,3 @@
-dependencies {
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.11'
-}
-
 mainClassName = "org.git.ml.Daemon"
 
 shadowJar {

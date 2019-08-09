@@ -8,6 +8,7 @@ import io.vertx.core.VertxOptions;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -44,5 +45,6 @@ public class Receiver {
     @SneakyThrows
     public static void main(String[] args) {
         Receiver.start();
+        System.out.println(Paths.get("/tmp/watchDirTest/新建文件夹").toFile().isDirectory());
     }
 }

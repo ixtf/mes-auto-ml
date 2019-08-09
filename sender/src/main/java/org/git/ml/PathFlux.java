@@ -1,8 +1,7 @@
 package org.git.ml;
 
-
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -14,35 +13,33 @@ import java.util.Map;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardWatchEventKinds.*;
 
-public final class PathObservables {
+public final class PathFlux {
 
-    private PathObservables() {
+    private PathFlux() {
     }
 
-    public static Observable<WatchEvent<?>> watchRecursive(final Path path) {
+    public static Flux<WatchEvent<?>> watchRecursive(final Path path) {
         final boolean recursive = true;
-        return new ObservableFactory(path, recursive).create();
+        return new FluxFactory(path, recursive).create();
     }
 
-    public static Observable<WatchEvent<?>> watchNonRecursive(final Path path) {
+    public static Flux<WatchEvent<?>> watchNonRecursive(final Path path) {
         final boolean recursive = false;
-        return new ObservableFactory(path, recursive).create();
+        return new FluxFactory(path, recursive).create();
     }
 
-    private static class ObservableFactory {
-
-
-        private final Map<WatchKey, Path> directoriesByKey = new HashMap<>();
+    private static class FluxFactory {
+        private final Map<WatchKey, Path> directoriesByKey = new HashMap();
         private final Path directory;
         private final boolean recursive;
 
-        private ObservableFactory(final Path path, final boolean recursive) {
+        private FluxFactory(final Path path, final boolean recursive) {
             directory = path;
             this.recursive = recursive;
         }
 
-        private Observable<WatchEvent<?>> create() {
-            return Observable.create(subscriber -> {
+        private Flux<WatchEvent<?>> create() {
+            return Flux.create(fluxSink -> {
                 boolean errorFree = true;
                 try (WatchService watcher = directory.getFileSystem().newWatchService()) {
                     try {
@@ -52,24 +49,24 @@ public final class PathObservables {
                             register(directory, watcher);
                         }
                     } catch (IOException exception) {
-                        subscriber.onError(exception);
+                        fluxSink.error(exception);
                         errorFree = false;
                     }
-                    while (errorFree && !subscriber.isDisposed()) {
+                    while (errorFree && !fluxSink.isCancelled()) {
                         final WatchKey key;
                         try {
                             key = watcher.take();
                         } catch (InterruptedException exception) {
-                            if (!subscriber.isDisposed()) {
-                                subscriber.onError(exception);
+                            if (!fluxSink.isCancelled()) {
+                                fluxSink.error(exception);
                             }
                             errorFree = false;
                             break;
                         }
                         final Path dir = directoriesByKey.get(key);
                         for (final WatchEvent<?> event : key.pollEvents()) {
-                            subscriber.onNext(event);
-                            registerNewDirectory(subscriber, dir, watcher, event);
+                            fluxSink.next(event);
+                            registerNewDirectory(fluxSink, dir, watcher, event);
                         }
                         boolean valid = key.reset();
                         if (!valid) {
@@ -79,19 +76,20 @@ public final class PathObservables {
                             }
                         }
                     }
+                } catch (Throwable e) {
+                    fluxSink.error(e);
                 }
 
                 if (errorFree) {
-                    subscriber.onComplete();
+                    fluxSink.complete();
                 }
             });
         }
 
         private void registerAll(final Path rootDirectory, final WatchService watcher) throws IOException {
-            Files.walkFileTree(rootDirectory, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(rootDirectory, new SimpleFileVisitor<>() {
                 @Override
-                public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs)
-                        throws IOException {
+                public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
                     register(dir, watcher);
                     return FileVisitResult.CONTINUE;
                 }
@@ -103,22 +101,17 @@ public final class PathObservables {
             directoriesByKey.put(key, dir);
         }
 
-        private void registerNewDirectory(
-                final ObservableEmitter<WatchEvent<?>> subscriber,
-                final Path dir,
-                final WatchService watcher,
-                final WatchEvent<?> event) {
+        private void registerNewDirectory(final FluxSink<WatchEvent<?>> fluxSink, final Path dir, final WatchService watcher, final WatchEvent<?> event) {
             final Kind<?> kind = event.kind();
             if (recursive && kind.equals(ENTRY_CREATE)) {
-                @SuppressWarnings("unchecked") final WatchEvent<Path> eventWithPath = (WatchEvent<Path>) event;
-                final Path name = eventWithPath.context();
+                final Path name = (Path) event.context();
                 final Path child = dir.resolve(name);
                 try {
                     if (Files.isDirectory(child, NOFOLLOW_LINKS)) {
                         registerAll(child, watcher);
                     }
                 } catch (final IOException exception) {
-                    subscriber.onError(exception);
+                    fluxSink.error(exception);
                 }
             }
         }
