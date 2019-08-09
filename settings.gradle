@@ -1,0 +1,4 @@
+rootProject.name = 'mes-auto-ml'
+include 'sender'
+include 'receiver'
+

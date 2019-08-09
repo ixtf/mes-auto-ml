@@ -1,0 +1,36 @@
+plugins {
+    id 'io.franzbecker.gradle-lombok' version '3.0.0'
+    id 'com.github.johnrengelman.shadow' version '5.0.0'
+}
+
+allprojects {
+    group 'org.jzb'
+    version '1.0-SNAPSHOT'
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.franzbecker.gradle-lombok'
+    apply plugin: 'application'
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    dependencies {
+        implementation "io.projectreactor.rabbitmq:reactor-rabbitmq:1.2.0.RELEASE"
+        implementation "ch.qos.logback:logback-classic:1.2.3"
+        implementation "ch.qos.logback:logback-access:1.2.3"
+        implementation "com.google.inject:guice:4.2.2"
+        implementation "io.vertx:vertx-core:3.8.0"
+    }
+
+    shadowJar {
+        archiveName "${project.name}.jar"
+    }
+}
