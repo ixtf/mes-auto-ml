@@ -47,37 +47,35 @@ public class ReceiverVerticle extends AbstractVerticle {
 
     private void saveFile(String product, Delivery delivery) {
         Mono.fromRunnable(() -> {
-            final Path dirPath = generateDirPath(product);
-            final Path originalFilePath = originalFilePath(delivery);
-            final Path savePath = dirPath.resolve(originalFilePath);
+            final Path path = savePath(product, delivery);
             final byte[] bytes = delivery.getBody();
-            vertx.fileSystem().writeFile(savePath.toString(), Buffer.buffer(bytes), ar -> {
+            vertx.fileSystem().writeFile(path.toString(), Buffer.buffer(bytes), ar -> {
                 if (ar.failed()) {
-                    final String msg = String.format("saveFile(%s)", savePath);
+                    final String msg = String.format("saveFile(%s)", path);
                     log.error(msg, ar.cause());
                 }
             });
         }).doOnError(err -> log.error("", err)).subscribe();
     }
 
-    private Path originalFilePath(Delivery delivery) {
-        final BasicProperties basicProperties = delivery.getProperties();
-        final Map<String, Object> headers = basicProperties.getHeaders();
-        final String filePath = (String) headers.get("filePath");
-        return Paths.get(filePath);
-    }
-
     @SneakyThrows
-    private Path generateDirPath(String product) {
+    private Path savePath(String product, Delivery delivery) {
         final LocalDate ld = LocalDate.now();
         final int year = ld.getYear();
         final int month = ld.getMonthValue();
         final int day = ld.getDayOfMonth();
         final Path dirPath = Paths.get(DIR, product, "" + year, "" + month, "" + day);
-        if (!Files.exists(dirPath)) {
-            Files.createDirectories(dirPath);
+
+        final BasicProperties basicProperties = delivery.getProperties();
+        final Map<String, Object> headers = basicProperties.getHeaders();
+        final String originalFilePath = headers.get("filePath").toString();
+
+        final Path savePath = Paths.get(dirPath.toString(), originalFilePath);
+        final Path parentPath = savePath.getParent();
+        if (!Files.exists(parentPath)) {
+            Files.createDirectories(parentPath);
         }
-        return dirPath;
+        return savePath;
     }
 
 }

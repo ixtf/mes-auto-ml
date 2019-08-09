@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.impl.LongStringHelper;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import reactor.rabbitmq.OutboundMessage;
 import reactor.rabbitmq.SendOptions;
 import reactor.rabbitmq.Sender;
 
+import java.io.File;
 import java.time.Duration;
 import java.util.Map;
 
@@ -39,6 +41,9 @@ public class Verticle1 extends AbstractVerticle {
         Daemon.INJECTOR.injectMembers(this);
         vertx.eventBus().<String>consumer(ADDRESS, reply -> {
             final String filePath = reply.body();
+            if (new File(filePath).isDirectory()) {
+                return;
+            }
             vertx.fileSystem().readFile(filePath, ar -> {
                 if (ar.failed()) {
                     final String msg = String.format("vertx.fileSystem().readFile(%s)", filePath);
@@ -52,7 +57,7 @@ public class Verticle1 extends AbstractVerticle {
 
     private void sendFile(String filePath, byte[] bytes) {
         final Map<String, Object> headers = Maps.newHashMap();
-        headers.put("filePath", filePath);
+        headers.put("filePath", LongStringHelper.asLongString(filePath));
         final BasicProperties basicProperties = new BasicProperties.Builder().headers(headers).build();
         final OutboundMessage outboundMessage = new OutboundMessage(Daemon.EXCHANGE, product, basicProperties, bytes);
         final Mono<OutboundMessage> outboundMessageMono = Mono.just(outboundMessage);

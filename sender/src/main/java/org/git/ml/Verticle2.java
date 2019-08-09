@@ -2,10 +2,10 @@ package org.git.ml;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import io.reactivex.schedulers.Schedulers;
 import io.vertx.core.AbstractVerticle;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.scheduler.Schedulers;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,8 +28,8 @@ public class Verticle2 extends AbstractVerticle {
     @Override
     public void start() {
         Daemon.INJECTOR.injectMembers(this);
-        PathObservables.watchRecursive(Paths.get(watchDir))
-                .subscribeOn(Schedulers.io())
+        PathFlux.watchRecursive(Paths.get(watchDir))
+                .subscribeOn(Schedulers.newSingle("PathFlux", true))
                 .filter(it -> ENTRY_CREATE == it.kind())
                 .map(WatchEvent::context)
                 .filter(Path.class::isInstance)
