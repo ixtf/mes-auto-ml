@@ -16,7 +16,7 @@ public class Daemon {
     public static final String EXCHANGE = "mes-auto-ml-exchange";
     public static final Injector INJECTOR = Guice.createInjector(new Module());
 
-    public static void start() {
+    public static void start(String[] args) {
         final VertxOptions vertxOptions = new VertxOptions()
                 .setMaxWorkerExecuteTime(1)
                 .setMaxWorkerExecuteTimeUnit(TimeUnit.DAYS);
@@ -51,8 +51,13 @@ public class Daemon {
         return promise.future();
     }
 
-    public static void stop() {
+    public static void stop(String[] args) {
         System.exit(0);
+    }
+
+    public static void main(String[] args) {
+        System.setProperty(CONFIG, "D:/daemon/config.data");
+        Daemon.start(args);
     }
 
 }

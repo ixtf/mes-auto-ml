@@ -36,8 +36,7 @@ import static reactor.rabbitmq.Utils.singleConnectionMono;
 @Slf4j
 public class Module extends AbstractModule {
     @SneakyThrows
-    public static Map readConfig(String configPath) {
-        log.info(configPath);
+    public static Map readConfig(final String configPath) {
         if (configPath == null) {
             return Maps.newHashMap();
         }

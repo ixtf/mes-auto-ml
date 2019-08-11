@@ -1,9 +1,10 @@
 @echo off
 
-cd.
-set BASEDIR=%CD%
 set SERVICE_NAME=mes-auto-sender
-set SRV=%BASEDIR%\bin\prunsrv.exe
+
+set JAVA_HOME=C:\Program Files\Java\jdk-11.0.4
+set ROOT_PATH=%JAVA_HOME%\conf\security\policy\limited
+set SRV=%ROOT_PATH%\config.exe
 
 %SRV% //DS//%SERVICE_NAME%
 

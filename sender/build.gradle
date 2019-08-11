@@ -1,3 +1,7 @@
+dependencies {
+    implementation "commons-daemon:commons-daemon:1.2.0"
+}
+
 mainClassName = "org.git.ml.Daemon"
 
 shadowJar {

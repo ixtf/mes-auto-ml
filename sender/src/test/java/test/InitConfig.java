@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.vertx.core.json.Json;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
-import org.git.ml.Daemon;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -21,20 +20,47 @@ import static org.git.ml.Daemon.CONFIG;
 /**
  * @author jzb 2019-08-10
  */
-public class TestConfig {
-    @SneakyThrows
+public class InitConfig {
     public static void main(String[] args) {
-        final String file = "/home/jzb/git/org.jzb/mes-auto-ml/sender/src/test/resources/test.data";
+//        test();
+        poy();
+        fdy();
+    }
+
+    @SneakyThrows
+    private static void poy() {
+        final ObjectNode objectNode = Json.mapper.createObjectNode()
+                .put("host", "192.168.0.38")
+                .put("username", "admin")
+                .put("password", "tomking")
+                .put("clientProvidedName", "mes-auto-ml-sender-POY")
+                .put("product", "POY")
+                .put("watchDir", "/tmp/watchDirTest");
+        write(objectNode, "/home/jzb/git/org.jzb/mes-auto-ml/sender/daemon/poy.data");
+    }
+
+    @SneakyThrows
+    private static void fdy() {
+        final ObjectNode objectNode = Json.mapper.createObjectNode()
+                .put("host", "192.168.0.38")
+                .put("username", "admin")
+                .put("password", "tomking")
+                .put("clientProvidedName", "mes-auto-ml-sender-FDY")
+                .put("product", "FDY")
+                .put("watchDir", "/tmp/watchDirTest");
+        write(objectNode, "/home/jzb/git/org.jzb/mes-auto-ml/sender/daemon/fdy.data");
+    }
+
+    @SneakyThrows
+    private static void test() {
         final ObjectNode objectNode = Json.mapper.createObjectNode()
                 .put("host", "192.168.0.38")
                 .put("username", "admin")
                 .put("password", "tomking")
                 .put("clientProvidedName", "mes-auto-ml-sender")
                 .put("product", "FDY")
-                .put("watchDir", "/tmp/watchDirTest");
-        write(objectNode, file);
-        System.setProperty(CONFIG, file);
-        Daemon.start();
+                .put("watchDir", "D:/daemon/watchDirTest");
+        write(objectNode, "/home/jzb/git/org.jzb/mes-auto-ml/sender/daemon/test.data");
     }
 
     public static void write(ObjectNode objectNode, String file) throws Exception {
