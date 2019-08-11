@@ -28,6 +28,5 @@ echo prunsrv path: %SRV%
 rem 安装
 "%SRV%" //IS//%SERVICE_EN_NAME% --DisplayName="%SERVICE_CH_NAME%" \
         "--Install=%SRV%" --Startup=auto "--JavaHome=%JAVA_HOME%" --Classpath=%CLASS_PATH% --StartMode=Java --StopMode=Java \
-        --StartPath=%ROOT_PATH% --StartClass=%MAIN_CLASS% --StartMethod=start \
-        --JvmOptions9=-Dmes.auto.ml.sender.config="%CONFIG_FILE%" \
-        --StopPath=%ROOT_PATH% --StopClass="%MAIN_CLASS%" --StopMethod=stop
+        --StartPath=%ROOT_PATH% --StartClass=%MAIN_CLASS% --StartMethod=start --JvmOptions9=-Dconfig=%CONFIG_FILE% \
+        --StopPath=%ROOT_PATH% --StopClass=%MAIN_CLASS% --StopMethod=stop

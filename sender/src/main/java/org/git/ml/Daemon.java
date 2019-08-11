@@ -1,24 +1,18 @@
 package org.git.ml;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.vertx.core.*;
-import io.vertx.core.json.Json;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
 import java.util.concurrent.TimeUnit;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author jzb 2019-08-08
  */
 @Slf4j
 public class Daemon {
+    public static final String CONFIG = "config";
     public static final String EXCHANGE = "mes-auto-ml-exchange";
     public static final Injector INJECTOR = Guice.createInjector(new Module());
 
@@ -34,10 +28,6 @@ public class Daemon {
                 log.info("{} success", Daemon.class);
             }
         });
-    }
-
-    public static void stop() {
-        System.exit(0);
     }
 
     private static Future<String> deploySendFile(Vertx vertx) {
@@ -61,14 +51,8 @@ public class Daemon {
         return promise.future();
     }
 
-    @SneakyThrows
-    public static void main(String[] args) {
-        Daemon.start();
-
-        final FileOutputStream fos = new FileOutputStream("/tmp/oos/test.data");
-        final ObjectOutputStream oos = new ObjectOutputStream(fos);
-        final ObjectNode objectNode = Json.mapper.createObjectNode()
-                .put("test", "test");
-        oos.write(objectNode.toString().getBytes(UTF_8));
+    public static void stop() {
+        System.exit(0);
     }
+
 }
