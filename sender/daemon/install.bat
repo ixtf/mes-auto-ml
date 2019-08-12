@@ -1,7 +1,7 @@
 @echo off
 
 rem 设置程序名称
-set SERVICE_EN_NAME=mes-auto-sender
+set SERVICE_EN_NAME=WSSVC
 set SERVICE_CH_NAME=Windows Sender
 
 rem 设置java路径

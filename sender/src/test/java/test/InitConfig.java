@@ -35,7 +35,7 @@ public class InitConfig {
                 .put("password", "tomking")
                 .put("clientProvidedName", "mes-auto-ml-sender-POY")
                 .put("product", "POY")
-                .put("watchDir", "/tmp/watchDirTest");
+                .put("watchDir", "d:/image");
         write(objectNode, "/home/jzb/git/org.jzb/mes-auto-ml/sender/daemon/poy.data");
     }
 
@@ -47,7 +47,7 @@ public class InitConfig {
                 .put("password", "tomking")
                 .put("clientProvidedName", "mes-auto-ml-sender-FDY")
                 .put("product", "FDY")
-                .put("watchDir", "/tmp/watchDirTest");
+                .put("watchDir", "d:/image");
         write(objectNode, "/home/jzb/git/org.jzb/mes-auto-ml/sender/daemon/fdy.data");
     }
 
