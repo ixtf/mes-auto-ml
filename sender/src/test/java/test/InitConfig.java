@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.vertx.core.json.Json;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
+import org.git.ml.Daemon;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -22,9 +23,23 @@ import static org.git.ml.Daemon.CONFIG;
  */
 public class InitConfig {
     public static void main(String[] args) {
-//        test();
-        poy();
-        fdy();
+        test();
+//        poy();
+//        fdy();
+    }
+
+    @SneakyThrows
+    private static void test() {
+        final ObjectNode objectNode = Json.mapper.createObjectNode()
+                .put("host", "192.168.0.38")
+                .put("username", "admin")
+                .put("password", "tomking")
+                .put("clientProvidedName", "mes-auto-ml-sender")
+                .put("product", "POY")
+                .put("watchDir", "/tmp/watchDirTest");
+        write(objectNode, "/home/jzb/git/org.jzb/mes-auto-ml/sender/daemon/test.data");
+        System.setProperty(CONFIG, "/home/jzb/git/org.jzb/mes-auto-ml/sender/daemon/test.data");
+        Daemon.start(null);
     }
 
     @SneakyThrows
@@ -49,18 +64,6 @@ public class InitConfig {
                 .put("product", "FDY")
                 .put("watchDir", "d:/image");
         write(objectNode, "/home/jzb/git/org.jzb/mes-auto-ml/sender/daemon/fdy.data");
-    }
-
-    @SneakyThrows
-    private static void test() {
-        final ObjectNode objectNode = Json.mapper.createObjectNode()
-                .put("host", "192.168.0.38")
-                .put("username", "admin")
-                .put("password", "tomking")
-                .put("clientProvidedName", "mes-auto-ml-sender")
-                .put("product", "FDY")
-                .put("watchDir", "D:/daemon/watchDirTest");
-        write(objectNode, "/home/jzb/git/org.jzb/mes-auto-ml/sender/daemon/test.data");
     }
 
     public static void write(ObjectNode objectNode, String file) throws Exception {

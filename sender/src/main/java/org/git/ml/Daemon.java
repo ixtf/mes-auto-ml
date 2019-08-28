@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.git.ml.Module.readConfig;
+
 /**
  * @author jzb 2019-08-08
  */
@@ -17,6 +19,7 @@ public class Daemon {
     public static final Injector INJECTOR = Guice.createInjector(new Module());
 
     public static void start(String[] args) {
+        System.out.println(readConfig(System.getProperty(CONFIG)));
         final VertxOptions vertxOptions = new VertxOptions()
                 .setMaxWorkerExecuteTime(1)
                 .setMaxWorkerExecuteTimeUnit(TimeUnit.DAYS);
@@ -56,7 +59,6 @@ public class Daemon {
     }
 
     public static void main(String[] args) {
-        System.setProperty(CONFIG, "D:/daemon/config.data");
         Daemon.start(args);
     }
 
